@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block main %}
+{% include 'flash_messages.html' %}
+<section>
+    <div class=".card-form card p-4">
+        <h2 class="h3 mb-3 fw-normal">Add New Property</h2>
+        <hr>
+        
+        <form method="POST" action="{{ url_for('properties_create') }}" enctype = "multipart/form-data">
+            {{ form.csrf_token }}
+            <div>
+                {{ form.title.label }}
+                {{ form.title(required = 'required')}}
+            </div>
+            <div>
+                {{ form.description.label }}
+                {{ form.description(required = 'required') }}
+            </div>
+            <div>
+                {{ form.rooms.label }}
+                {{ form.rooms(required = 'required') }}
+            </div>
+            <div>
+                {{ form.bathrooms.label }}
+                {{ form.bathrooms(required = 'required') }}
+            </div>
+            <div>
+                {{ form.price.label }}
+                {{ form.price(required = 'required') }}
+            </div>
+            <div>
+                {{ form.property_type.label }}
+                {{ form.property_type(required = 'required') }}
+            </div>
+            <div>
+                {{ form.location.label }}
+                {{ form.location(required = 'required') }}
+            </div>
+            <div>
+                {{ form.photo.label }}
+                {{ form.photo(required = 'required') }}
+            </div>
+
+    <button type="submit" id="submit"> Submit</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

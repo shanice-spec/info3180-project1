@@ -4,9 +4,13 @@ Jinja2 Documentation:    https://jinja.palletsprojects.com/
 Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file contains the routes for your application.
 """
-
-from app import app
+import os
+from flask import render_template, request, redirect, url_for, flash, session, abort, send_from_directory
+from app import app,db
 from flask import render_template, request, redirect, url_for
+from werkzeug.utils import secure_filename
+from app.forms import PropertyForm
+from app.models import Property
 
 
 ###
@@ -24,7 +28,22 @@ def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
 
-
+@app.route('/properties/create', methods=['GET','POST'])
+def properties_create():
+    form = PropertyForm()
+    if form.validate_on_submit():
+        photo = form.photo.data
+        photo_file = photo.filename
+        property = Property(title=form.title.data, type=form.property_type.data, num_bedrooms=form.rooms.data,
+        num_bathrooms=form.bathrooms.data, location=form.location.data,
+        price=form.price.data, description=form.description.data,
+          photo_filename=photo_file)
+        db.session.add(property)
+        db.session.commit()
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_file))
+        flash('Property added successfully', 'success')
+        return redirect(url_for("list_properties"))
+    return render_template('propertyform.html', form=form)
 ###
 # The functions below should be applicable to all Flask apps.
 ###
@@ -44,6 +63,19 @@ def send_text_file(file_name):
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
 
+@app.route('/properties')
+def list_properties():
+    properties = Property.query.all()
+    return render_template('propertylist.html', properties=properties)
+
+@app.route('/properties/<int:propertyid>')
+def view_property(propertyid):
+    property = Property.query.get(propertyid)
+    return render_template('view_property.html', property=property)
+
+@app.route('/upload/<filename>')
+def get_image(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
 
 @app.after_request
 def add_header(response):
